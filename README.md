@@ -19,7 +19,6 @@ The complete pipeline includes:
 
 - **train_users.csv / test_users.csv** – User feature data labeled as User1, User2, or User3.
 - **news_articles.csv** – News articles with category labels and headlines.
-- **rlcmab_sampler** – Provided sampler utility to generate rewards for arm selections.
 
 ---
 
@@ -160,10 +159,3 @@ This project demonstrates a complete Contextual Multi-Armed Bandit recommendatio
 
 Among the evaluated strategies, UCB provided the strongest performance.  
 The system successfully learns personalized category preferences and improves recommendations over time.
-
----
-
-## Files
-
-- `lab3_results_<roll_number>.ipynb` – Full implementation and plots
-- `README.md` – Project report
