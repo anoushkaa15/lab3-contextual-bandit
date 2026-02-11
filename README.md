@@ -1,74 +1,169 @@
-# Student Submission Checklist (Lab 3)
+# Lab 3 – Contextual Bandit Based News Recommendation System
 
-Before submitting your Lab 3 assignment, ensure that **all items below are completed**. Submissions that do not follow this checklist may receive partial or no credit.
+## Overview
 
----
+This project implements a Contextual Multi-Armed Bandit (CMAB) framework for personalized news recommendation.  
+The system treats user categories as contexts and news categories as arms. A reinforcement learning agent learns optimal category recommendations for each user type by interacting with a simulated reward environment.
 
-## 🔹 Repository and Branching
+The complete pipeline includes:
 
-* [ ] The repository is correctly created on GitHub.
-* [ ] All work is committed to **exactly one branch** named
-  `firstname_U20230xxx`.
-* [ ] **No work is pushed to `master`**.
-* [ ] The correct branch is pushed to GitHub.
-
----
-
-## 🔹 Notebook Submission
-
-* [ ] Exactly **one** Jupyter Notebook (`.ipynb`) is submitted.
-* [ ] The notebook is placed at the **root of the repository**.
-* [ ] The notebook is named **exactly**:
-  `lab3_results_<roll_number>.ipynb`.
-* [ ] The notebook runs **top to bottom without errors**.
-* [ ] All outputs (plots, tables, metrics) are visible in the notebook.
+1. User classification
+2. Contextual bandit learning
+3. Hyperparameter tuning
+4. End-to-end recommendation engine
+5. Evaluation and analysis
 
 ---
 
-## 🔹 Sampler Usage
+## Datasets
 
-* [ ] The provided `sampler` package is used **without modification**.
-* [ ] The sampler is initialized using your correct roll number `i`.
-* [ ] Rewards are obtained **only** via `sampler.sample(j)`.
-* [ ] No hard-coded or synthetic rewards are used.
-
----
-
-## 🔹 Contextual Bandit Implementation
-
-* [ ] User category is treated as the **context**.
-* [ ] News category is treated as the **bandit arm**.
-* [ ] The arm index mapping follows the specification in the lab handout.
-* [ ] All three algorithms are implemented:
-
-  * Epsilon-Greedy
-  * Upper Confidence Bound (UCB)
-  * SoftMax
+- **train_users.csv / test_users.csv** – User feature data labeled as User1, User2, or User3.
+- **news_articles.csv** – News articles with category labels and headlines.
+- **rlcmab_sampler** – Provided sampler utility to generate rewards for arm selections.
 
 ---
 
-## 🔹 Evaluation and Plots
+## Methodology
 
-* [ ] Classification accuracy is reported on `test_users.csv`.
-* [ ] Reinforcement learning simulation is run for **T = 10,000 steps**.
-* [ ] Plots include:
+### 1. Data Preprocessing
 
-  * Average Reward vs. Time (per context)
-  * Hyperparameter comparison plots
-* [ ] All plots have labeled axes, legends, and titles.
+- Removed missing values.
+- Applied numeric and categorical encoding using `ColumnTransformer`.
+- Split user data into 80% training and 20% validation sets.
 
 ---
 
-## 🔹 README.md Requirements
+### 2. User Classification
 
-* [ ] README.md is present at the repository root.
-* [ ] It explains the overall approach and design decisions.
-* [ ] It summarizes key results and observations.
-* [ ] It includes clear instructions to reproduce the experiments.
-* [ ] All external references (if any) are properly cited.
+An XGBoost classifier was trained to predict user context (User1, User2, User3).
+
+Evaluation was performed on a validation split using `classification_report`.
+
+The classifier serves as the context detector for the recommendation engine.
 
 ---
 
-## Important Note
+### 3. Contextual Bandit Algorithms
 
-> Submissions that do not follow the specified branch name, notebook naming convention, or sampler usage rules may not be evaluated.
+Three strategies were implemented:
+
+#### Epsilon-Greedy
+- Tested ε ∈ {0, 0.01, 0.1}
+- Maintained separate bandits for each user context.
+
+#### Upper Confidence Bound (UCB)
+- Tested C ∈ {0.5, 1.0, 2.0}
+- Uses optimism-based exploration.
+
+#### SoftMax
+- Fixed temperature τ = 1
+- Probabilistic arm selection.
+
+Each algorithm was trained for **T = 10,000** steps using the provided sampler.
+
+Expected reward distributions were computed for every (User, Category) pair.
+
+---
+
+### 4. Recommendation Engine
+
+The final CMAB pipeline performs:
+
+1. **Classify** user using trained classifier.
+2. **Select Category** using learned bandit policy.
+3. **Recommend Article** by sampling from `news_articles.csv`.
+4. **Output** predicted user type, recommended category, and article headline.
+
+Synthetic bandit categories were mapped to dataset categories as follows:
+
+- Entertainment → ENTERTAINMENT  
+- Education → EDUCATION  
+- Tech → BUSINESS  
+- Crime → CRIME  
+
+---
+
+## Evaluation
+
+### Classification Performance
+
+The classifier achieved strong validation accuracy, indicating reliable detection of user contexts.
+
+---
+
+### Reinforcement Learning Results
+
+Each bandit algorithm was evaluated over 10,000 timesteps.
+
+Plots include:
+
+- Average Reward vs Time (per user context)
+- Hyperparameter comparison for ε (Epsilon-Greedy)
+- Hyperparameter comparison for C (UCB)
+
+All plots contain labeled axes, legends, and descriptive titles.
+
+---
+
+## Results and Analysis
+
+### Algorithm Comparison
+
+- **UCB** achieved the highest overall average reward.
+- **Epsilon-Greedy** performed competitively when ε was small.
+- **SoftMax** showed stable but slightly lower performance.
+
+### Hyperparameter Sensitivity
+
+- Increasing ε reduced average reward due to excessive exploration.
+- Intermediate C values produced best UCB performance.
+- SoftMax with τ = 1 provided smooth exploration but limited adaptability.
+
+### Contextual Behavior
+
+The learned policies converged to:
+
+- User1 → Education
+- User2 → Tech
+- User3 → Education
+
+demonstrating successful context-aware learning.
+
+---
+
+## Strengths and Limitations
+
+### Epsilon-Greedy
+- Simple and efficient
+- Requires manual tuning
+- Random exploration can be inefficient
+
+### UCB
+- Best empirical performance
+- Adaptive exploration
+- Slightly higher computational cost
+
+### SoftMax
+- Smooth probabilistic exploration
+- Sensitive to temperature selection
+
+---
+
+## Conclusion
+
+This project demonstrates a complete Contextual Multi-Armed Bandit recommendation system integrating:
+
+- Supervised user classification
+- Context-aware reinforcement learning
+- Hyperparameter tuning
+- Real-world article recommendation
+
+Among the evaluated strategies, UCB provided the strongest performance.  
+The system successfully learns personalized category preferences and improves recommendations over time.
+
+---
+
+## Files
+
+- `lab3_results_<roll_number>.ipynb` – Full implementation and plots
+- `README.md` – Project report
